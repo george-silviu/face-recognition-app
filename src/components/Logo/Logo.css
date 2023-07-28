@@ -1,0 +1,6 @@
+.Tilt {
+  background: linear-gradient(to right, #7fff00, #8a2be2);
+  height: 170px;
+  width: 200px;
+  cursor: pointer;
+}
