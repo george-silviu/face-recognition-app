@@ -56,6 +56,7 @@ class App extends Component {
       imageUrl: "",
       box: {},
       route: "signin",
+      isSignedIn: false,
     };
   }
 
@@ -99,12 +100,18 @@ class App extends Component {
   };
 
   onRouteChange = (route) => {
+    if (route === "signout") {
+      this.setState({ isSignedIn: false });
+    } else if (route === "home") {
+      this.setState({ isSignedIn: true });
+    }
+
     this.setState({ route: route });
   };
 
   render() {
     return (
-      <div className="App">
+      <div className="App ">
         {this.state.route === "home" ? (
           <div>
             <ParticlesBg type="thick" bg={true} num={2500} />
@@ -113,7 +120,10 @@ class App extends Component {
               style={{ display: "flex", justifyContent: "space-between" }}
             >
               <Logo />
-              <Navigation onRouteChange={this.onRouteChange} />
+              <Navigation
+                onRouteChange={this.onRouteChange}
+                isSignedIn={this.isSignedIn}
+              />
             </div>
             <Rank />
             <ImageLinkForm
@@ -127,6 +137,10 @@ class App extends Component {
           <div>
             <ParticlesBg type="cobweb" bg={true} num={200} />
             <Signin onRouteChange={this.onRouteChange} />
+            <Navigation
+              onRouteChange={this.onRouteChange}
+              isSignedIn={this.isSignedIn}
+            />
           </div>
         ) : (
           <div>
