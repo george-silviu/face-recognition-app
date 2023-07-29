@@ -7,6 +7,7 @@ import Rank from "./components/Rank/Rank";
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
 import ParticlesBg from "particles-bg";
 import Signin from "./components/Signin/Signin";
+import Register from "./components/Register/Register";
 
 const MODEL_ID = "face-detection"; //clarafai model used for image recognition
 const clarifaiRequestOptions = (imageUrl) => {
@@ -54,6 +55,7 @@ class App extends Component {
       input: "",
       imageUrl: "",
       box: {},
+      route: "signin",
     };
   }
 
@@ -96,25 +98,42 @@ class App extends Component {
       .catch((err) => console.log(err));
   };
 
+  onRouteChange = (route) => {
+    this.setState({ route: route });
+  };
+
   render() {
     return (
       <div className="App">
-        <ParticlesBg type="lines" bg={true} num={2500} />
-        <div
-          className="topContainer"
-          style={{ display: "flex", justifyContent: "space-between" }}
-        >
-          <Logo />
-          <Navigation />
-        </div>
-        <Signin />
-        <Rank />
-        <ImageLinkForm
-          onInputChange={this.onInputChange}
-          onButtonSubmit={this.onSubmit}
-        />
+        {this.state.route === "home" ? (
+          <div>
+            <ParticlesBg type="thick" bg={true} num={2500} />
+            <div
+              className="topContainer"
+              style={{ display: "flex", justifyContent: "space-between" }}
+            >
+              <Logo />
+              <Navigation onRouteChange={this.onRouteChange} />
+            </div>
+            <Rank />
+            <ImageLinkForm
+              onInputChange={this.onInputChange}
+              onButtonSubmit={this.onSubmit}
+            />
 
-        <FaceRecognition image={this.state.imageUrl} box={this.state.box} />
+            <FaceRecognition image={this.state.imageUrl} box={this.state.box} />
+          </div>
+        ) : this.state.route === "signin" ? (
+          <div>
+            <ParticlesBg type="cobweb" bg={true} num={200} />
+            <Signin onRouteChange={this.onRouteChange} />
+          </div>
+        ) : (
+          <div>
+            <ParticlesBg type="cobweb" bg={true} num={200} />
+            <Register onRouteChange={this.onRouteChange} />)
+          </div>
+        )}
       </div>
     );
   }
