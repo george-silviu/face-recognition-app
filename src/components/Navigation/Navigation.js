@@ -13,20 +13,22 @@ const Navigation = ({ onRouteChange, isSignedIn }) => {
       </nav>
     );
   } else {
-    <nav>
-      <p
-        className="f3 mr4 link dim white underline pa3 pointer "
-        onClick={() => onRouteChange("home")}
-      >
-        Sign In
-      </p>
-      <p
-        className="f3 mr4 link dim white underline pa3 pointer "
-        onClick={() => onRouteChange("home")}
-      >
-        Register
-      </p>
-    </nav>;
+    return (
+      <nav style={{ display: "flex", justifyContent: "flex-end" }}>
+        <p
+          className="f3 mr4 link dim white underline pa3 pointer "
+          onClick={() => onRouteChange("signin")}
+        >
+          Sign In
+        </p>
+        <p
+          className="f3 mr4 link dim white underline pa3 pointer "
+          onClick={() => onRouteChange("register")}
+        >
+          Register
+        </p>
+      </nav>
+    );
   }
 };
 

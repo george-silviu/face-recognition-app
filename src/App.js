@@ -104,15 +104,19 @@ class App extends Component {
       this.setState({ isSignedIn: false });
     } else if (route === "home") {
       this.setState({ isSignedIn: true });
+    } else if (route === "signin") {
+      this.setState({ isSignedIn: false });
     }
 
     this.setState({ route: route });
   };
 
   render() {
+    const { isSignedIn, imageUrl, route, box } = this.state;
+
     return (
       <div className="App ">
-        {this.state.route === "home" ? (
+        {route === "home" ? (
           <div>
             <ParticlesBg type="thick" bg={true} num={2500} />
             <div
@@ -122,7 +126,7 @@ class App extends Component {
               <Logo />
               <Navigation
                 onRouteChange={this.onRouteChange}
-                isSignedIn={this.isSignedIn}
+                isSignedIn={isSignedIn}
               />
             </div>
             <Rank />
@@ -131,21 +135,25 @@ class App extends Component {
               onButtonSubmit={this.onSubmit}
             />
 
-            <FaceRecognition image={this.state.imageUrl} box={this.state.box} />
+            <FaceRecognition image={imageUrl} box={box} />
           </div>
-        ) : this.state.route === "signin" ? (
+        ) : route === "signin" ? (
           <div>
             <ParticlesBg type="cobweb" bg={true} num={200} />
-            <Signin onRouteChange={this.onRouteChange} />
             <Navigation
               onRouteChange={this.onRouteChange}
-              isSignedIn={this.isSignedIn}
+              isSignedIn={isSignedIn}
             />
+            <Signin onRouteChange={this.onRouteChange} />
           </div>
         ) : (
           <div>
             <ParticlesBg type="cobweb" bg={true} num={200} />
-            <Register onRouteChange={this.onRouteChange} />)
+            <Navigation
+              onRouteChange={this.onRouteChange}
+              isSignedIn={isSignedIn}
+            />
+            <Register onRouteChange={this.onRouteChange} />
           </div>
         )}
       </div>
