@@ -9,62 +9,25 @@ import ParticlesBg from "particles-bg";
 import Signin from "./components/Signin/Signin";
 import Register from "./components/Register/Register";
 
-const MODEL_ID = "face-detection"; //clarafai model used for image recognition
-const clarifaiRequestOptions = (imageUrl) => {
-  // Your PAT (Personal Access Token) can be found in the portal under Authentification
-  const PAT = "425b61ce7bbd4feca1723235cc4fe116";
-  // Specify the correct user_id/app_id pairings
-  // Since you're making inferences outside your app's scope
-  const USER_ID = "george-silviu";
-  const APP_ID = "face-recognition-app";
-  // Change these to whatever model and image URL you want to use
-  const IMAGE_URL = imageUrl;
-
-  const raw = JSON.stringify({
-    user_app_id: {
-      user_id: USER_ID,
-      app_id: APP_ID,
-    },
-    inputs: [
-      {
-        data: {
-          image: {
-            url: IMAGE_URL,
-          },
-        },
-      },
-    ],
-  });
-
-  const requestOptions = {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      Authorization: "Key " + PAT,
-    },
-    body: raw,
-  };
-
-  return requestOptions;
+const initialState = {
+  input: "",
+  imageUrl: "",
+  box: {},
+  route: "signin",
+  isSignedIn: false,
+  user: {
+    id: "",
+    name: "",
+    email: "",
+    entries: 0,
+    joined: "",
+  },
 };
 
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      input: "",
-      imageUrl: "",
-      box: {},
-      route: "signin",
-      isSignedIn: false,
-      user: {
-        id: "",
-        name: "",
-        email: "",
-        entries: 0,
-        joined: "",
-      },
-    };
+    this.state = initialState;
   }
 
   loadUser = (data) => {
@@ -96,7 +59,6 @@ class App extends Component {
   };
 
   displayFaceBox = (box) => {
-    console.log(box);
     this.setState({ box: box });
   };
 
@@ -104,15 +66,33 @@ class App extends Component {
     this.setState({ input: event.target.value });
   };
 
-  onSubmit = () => {
+  onPictureSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    //make request to API
-    fetch(
-      "https://api.clarifai.com/v2/models/" + MODEL_ID + "/outputs",
-      clarifaiRequestOptions(this.state.input)
-    )
+
+    fetch("http://localhost:3000/imageurl", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        input: this.state.input,
+      }),
+    })
       .then((response) => response.json())
       .then((response) => {
+        console.log(response);
+        if (response) {
+          fetch("http://localhost:3000/image", {
+            method: "put",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: this.state.user.id,
+            }),
+          })
+            .then((res) => res.json())
+            .then((count) => {
+              this.setState(Object.assign(this.state.user, { entries: count }));
+            })
+            .catch(console.log);
+        }
         this.displayFaceBox(this.calculateFaceLocation(response));
       })
       .catch((err) => console.log(err));
@@ -120,13 +100,10 @@ class App extends Component {
 
   onRouteChange = (route) => {
     if (route === "signout") {
-      this.setState({ isSignedIn: false });
+      this.setState(initialState);
     } else if (route === "home") {
       this.setState({ isSignedIn: true });
-    } else if (route === "signin") {
-      this.setState({ isSignedIn: false });
     }
-
     this.setState({ route: route });
   };
 
@@ -135,48 +112,35 @@ class App extends Component {
 
     return (
       <div className="App ">
+        <ParticlesBg type="cobweb" bg={true} />
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <Logo />
+          <Navigation
+            onRouteChange={this.onRouteChange}
+            isSignedIn={isSignedIn}
+          />
+        </div>
+
         {route === "home" ? (
           <div>
-            <ParticlesBg type="thick" bg={true} num={2500} />
-            <div
-              className="topContainer"
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
-              <Logo />
-              <Navigation
-                onRouteChange={this.onRouteChange}
-                isSignedIn={isSignedIn}
-              />
-            </div>
-            <Rank />
+            <Rank
+              name={this.state.user.name}
+              entries={this.state.user.entries}
+            />
             <ImageLinkForm
               onInputChange={this.onInputChange}
-              onButtonSubmit={this.onSubmit}
+              onPictureSubmit={this.onPictureSubmit}
             />
 
             <FaceRecognition image={imageUrl} box={box} />
           </div>
         ) : route === "signin" ? (
-          <div>
-            <ParticlesBg type="cobweb" bg={true} num={200} />
-            <Navigation
-              onRouteChange={this.onRouteChange}
-              isSignedIn={isSignedIn}
-            />
-            <Signin onRouteChange={this.onRouteChange} />
-          </div>
+          <Signin onRouteChange={this.onRouteChange} loadUser={this.loadUser} />
         ) : (
-          <div>
-            <ParticlesBg type="cobweb" bg={true} num={200} />
-            <Navigation
-              onRouteChange={this.onRouteChange}
-              isSignedIn={isSignedIn}
-            />
-            <Register
-              onRouteChange={this.onRouteChange}
-              loadUser={this.loadUser}
-            />
-          </div>
+          <Register
+            onRouteChange={this.onRouteChange}
+            loadUser={this.loadUser}
+          />
         )}
       </div>
     );
